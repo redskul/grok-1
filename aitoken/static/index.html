@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Token (AIT) — Mine · Trade · Spend on AI</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <div class="brand"><span class="coin">◈</span> AI&nbsp;Token <span class="ticker">AIT</span></div>
+  <nav id="tabs">
+    <button data-tab="explorer" class="active">Explorer</button>
+    <button data-tab="mining">Mining</button>
+    <button data-tab="wallet">Wallet</button>
+    <button data-tab="trade">Trade</button>
+    <button data-tab="ai">Spend on AI</button>
+    <button data-tab="fees">Fee Revenue</button>
+  </nav>
+  <div id="netstat">
+    <span>height <b id="st-height">–</b></span>
+    <span>difficulty <b id="st-diff">–</b> bits</span>
+    <span>reward <b id="st-reward">–</b> AIT</span>
+    <span><b id="st-hashrate">–</b> H/s</span>
+  </div>
+</header>
+
+<main>
+  <!-- ============================ EXPLORER ============================ -->
+  <section id="tab-explorer" class="tab active">
+    <h2>Blockchain Explorer</h2>
+    <div class="row">
+      <input id="explorer-search" placeholder="search by block height, block hash, txid or address">
+      <button onclick="explorerSearch()">Search</button>
+    </div>
+    <div id="explorer-result" class="card hidden"><pre id="explorer-result-pre"></pre></div>
+    <table id="blocks-table">
+      <thead><tr><th>Height</th><th>Hash</th><th>Time</th><th>Txs</th><th>Miner reward</th><th>Difficulty</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <!-- ============================= MINING ============================= -->
+  <section id="tab-mining" class="tab">
+    <h2>Mining</h2>
+    <div class="cards">
+      <div class="card"><h3>Block reward</h3><div class="big" id="mine-reward">–</div>
+        <div class="sub">next halving at block <b id="mine-halving">–</b></div></div>
+      <div class="card"><h3>Difficulty</h3><div class="big" id="mine-diff">–</div>
+        <div class="sub">leading zero bits</div></div>
+      <div class="card"><h3>Est. network hashrate</h3><div class="big" id="mine-hashrate">–</div></div>
+      <div class="card"><h3>Mempool</h3><div class="big" id="mine-mempool">–</div>
+        <div class="sub">pending transactions</div></div>
+    </div>
+    <div class="card">
+      <h3>Start mining (earn AIT)</h3>
+      <p>Run the CLI miner against this node — rewards go straight to your address:</p>
+      <pre id="mine-cmd">python -m aitoken miner --node http://localhost:8545 --address &lt;your-address&gt;</pre>
+      <button onclick="copyMineCmd()">Copy command</button>
+    </div>
+    <div class="card">
+      <h3>Top miners</h3>
+      <table id="miners-table"><thead><tr><th>Address</th><th>Blocks mined</th></tr></thead><tbody></tbody></table>
+    </div>
+  </section>
+
+  <!-- ============================= WALLET ============================= -->
+  <section id="tab-wallet" class="tab">
+    <h2>Wallet</h2>
+    <div class="card warn">Demo wallet: the private key lives in your browser's localStorage and is
+      sent to <i>this local node</i> for signing. Don't use it for anything you care about.</div>
+    <div id="wallet-none" class="card">
+      <p>No wallet yet.</p>
+      <button onclick="createWallet()">Create wallet</button>
+    </div>
+    <div id="wallet-info" class="hidden">
+      <div class="cards">
+        <div class="card"><h3>Address</h3><div class="addr" id="w-address">–</div>
+          <button class="small" onclick="copyAddress()">Copy</button>
+          <button class="small danger" onclick="forgetWallet()">Forget wallet</button></div>
+        <div class="card"><h3>On-chain balance</h3><div class="big" id="w-balance">–</div></div>
+        <div class="card"><h3>USD credits</h3><div class="big" id="w-usd">–</div>
+          <div class="sub">locked in orders: <b id="w-usd-locked">–</b></div></div>
+        <div class="card"><h3>Exchange AIT</h3><div class="big" id="w-exait">–</div>
+          <div class="sub">locked in orders: <b id="w-exait-locked">–</b></div></div>
+      </div>
+      <div class="card">
+        <h3>Send AIT</h3>
+        <div class="row">
+          <input id="send-to" placeholder="recipient address (AIT…)">
+          <input id="send-amount" type="number" step="0.00000001" min="0" placeholder="amount AIT">
+          <button onclick="sendAit()">Send</button>
+        </div>
+        <div id="send-msg" class="msg"></div>
+      </div>
+      <div class="card">
+        <h3>Recent transactions</h3>
+        <table id="wallet-txs"><thead><tr><th>Txid</th><th>Block</th><th>From</th><th>To</th><th>Amount</th></tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== TRADE ============================= -->
+  <section id="tab-trade" class="tab">
+    <h2>Trade AIT / USD</h2>
+    <div class="cards">
+      <div class="card"><h3>Last price</h3><div class="big" id="t-last">–</div>
+        <svg id="t-spark" width="220" height="40"></svg></div>
+      <div class="card">
+        <h3>Get demo USD</h3>
+        <div class="row"><input id="faucet-amount" type="number" value="500" min="1" placeholder="USD">
+        <button onclick="faucet()">Faucet</button></div>
+        <div id="faucet-msg" class="msg"></div>
+      </div>
+      <div class="card">
+        <h3>Deposit AIT to exchange</h3>
+        <div class="row"><input id="dep-amount" type="number" step="0.00000001" min="0" placeholder="amount AIT">
+        <button onclick="depositAit()">Deposit</button></div>
+        <div class="sub">sends an on-chain tx to the exchange; credits after the next block</div>
+        <div id="dep-msg" class="msg"></div>
+      </div>
+      <div class="card">
+        <h3>Withdraw AIT</h3>
+        <div class="row"><input id="wd-amount" type="number" step="0.00000001" min="0" placeholder="amount AIT">
+        <button onclick="withdrawAit()">Withdraw</button></div>
+        <div id="wd-msg" class="msg"></div>
+      </div>
+    </div>
+    <div class="trade-grid">
+      <div class="card">
+        <h3>Place order</h3>
+        <div class="row">
+          <select id="o-side"><option value="buy">Buy</option><option value="sell">Sell</option></select>
+          <input id="o-price" type="number" step="0.01" min="0" placeholder="price USD / AIT">
+          <input id="o-qty" type="number" step="0.00000001" min="0" placeholder="quantity AIT">
+          <button onclick="placeOrder()">Place</button>
+        </div>
+        <div id="order-msg" class="msg"></div>
+        <h3>Your open orders</h3>
+        <table id="open-orders"><thead><tr><th>Side</th><th>Price</th><th>Remaining</th><th></th></tr></thead><tbody></tbody></table>
+      </div>
+      <div class="card">
+        <h3>Order book</h3>
+        <table id="orderbook">
+          <thead><tr><th>Bid qty</th><th>Bid</th><th>Ask</th><th>Ask qty</th></tr></thead><tbody></tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h3>Recent trades</h3>
+        <table id="trades-table"><thead><tr><th>Time</th><th>Price</th><th>Qty</th><th>Fee</th></tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ AI SPEND ============================ -->
+  <section id="tab-ai" class="tab">
+    <h2>Spend AIT on AI usage</h2>
+    <div class="card warn">Simulated integration: no AI provider accepts AIT today. Spending burns your
+      tokens to the provider's on-chain sink address and issues a demo receipt — the
+      <code>SpendProvider</code> class in <code>aitoken/ai_spend.py</code> is the hook for a real integration.</div>
+    <div class="cards" id="providers"></div>
+    <div class="card">
+      <h3>Buy model tokens</h3>
+      <div class="row">
+        <select id="ai-provider"></select>
+        <input id="ai-tokens" type="number" value="100000" min="1000" step="1000" placeholder="model tokens">
+        <button onclick="aiSpend()">Spend AIT</button>
+      </div>
+      <div id="ai-msg" class="msg"></div>
+      <pre id="ai-receipt" class="hidden"></pre>
+    </div>
+  </section>
+
+  <!-- ============================ FEE REVENUE ========================= -->
+  <section id="tab-fees" class="tab">
+    <h2>Fee Revenue <span class="owner-badge">platform owner</span></h2>
+    <div class="cards">
+      <div class="card gold"><h3>Total fees collected</h3><div class="big" id="f-total">–</div>
+        <div class="sub">every trade pays <b id="f-pct">–</b>% (taker) to the owner</div></div>
+      <div class="card"><h3>Owner USD balance</h3><div class="big" id="f-balance">–</div></div>
+      <div class="card"><h3>Trades executed</h3><div class="big" id="f-trades">–</div></div>
+      <div class="card"><h3>Owner address</h3><div class="addr" id="f-owner">–</div></div>
+    </div>
+    <div class="card">
+      <h3>Recent fee events</h3>
+      <table id="fees-table"><thead><tr><th>Time</th><th>Trade</th><th>Notional</th><th>Fee earned</th><th>Paid by (taker)</th></tr></thead><tbody></tbody></table>
+    </div>
+  </section>
+</main>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
