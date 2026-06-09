@@ -1,0 +1,33 @@
+# systemd unit for a bare-VPS deployment (no Docker).
+#
+#   sudo useradd -r -m -d /var/lib/aitoken aitoken
+#   sudo -u aitoken git clone <repo> /var/lib/aitoken/app
+#   sudo -u aitoken pip install --user -r /var/lib/aitoken/app/requirements-aitoken.txt
+#   sudo cp deploy/aitoken.service /etc/systemd/system/
+#   sudo systemctl enable --now aitoken
+#
+# Back up /var/lib/aitoken/owner_wallet.json — it collects all exchange fees.
+[Unit]
+Description=AI Token (AIT) blockchain node and dashboard
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=aitoken
+WorkingDirectory=/var/lib/aitoken/app
+Environment=AITOKEN_DB_PATH=/var/lib/aitoken/aitoken.db
+Environment=AITOKEN_OWNER_WALLET_PATH=/var/lib/aitoken/owner_wallet.json
+Environment=AITOKEN_PORT=8545
+ExecStart=/usr/bin/python3 -m aitoken node
+Restart=on-failure
+RestartSec=3
+
+# Hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/aitoken
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

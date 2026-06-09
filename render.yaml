@@ -1,0 +1,20 @@
+# One-click deploy blueprint for Render (https://render.com).
+# Dashboard -> New -> Blueprint -> point at this repo/branch.
+# The persistent disk keeps the chain DB and the fee-collecting owner wallet.
+services:
+  - type: web
+    name: aitoken
+    runtime: docker
+    plan: starter
+    healthCheckPath: /api/status
+    envVars:
+      - key: AITOKEN_PORT
+        value: "8545"
+      - key: AITOKEN_DB_PATH
+        value: /data/aitoken.db
+      - key: AITOKEN_OWNER_WALLET_PATH
+        value: /data/owner_wallet.json
+    disk:
+      name: aitoken-data
+      mountPath: /data
+      sizeGB: 1

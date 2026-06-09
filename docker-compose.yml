@@ -1,0 +1,18 @@
+services:
+  aitoken:
+    build: .
+    container_name: aitoken
+    ports:
+      - "8545:8545"
+    volumes:
+      - aitoken-data:/data
+    environment:
+      # Uncomment to pin the fee recipient / fee rate instead of using the
+      # auto-generated owner wallet in /data/owner_wallet.json.
+      # AITOKEN_OWNER_ADDRESS: "AIT..."
+      # AITOKEN_FEE_PERCENT: "0.5"
+      AITOKEN_PORT: "8545"
+    restart: unless-stopped
+
+volumes:
+  aitoken-data:

@@ -60,6 +60,40 @@ Interactive docs at `http://localhost:8545/docs`. Highlights:
 | `GET /api/exchange/fees` | owner fee revenue |
 | `POST /api/ai/spend`, `GET /api/ai/providers` | spend AIT on AI usage |
 
+## Deployment
+
+**Docker (any VPS or cloud VM):**
+
+```bash
+docker compose up -d --build      # from the repo root
+docker logs aitoken               # shows your owner address on first start
+```
+
+The chain database and the auto-generated **owner wallet** (the key that collects
+all exchange fees) live on the `aitoken-data` volume — back up
+`/data/owner_wallet.json` immediately:
+
+```bash
+docker cp aitoken:/data/owner_wallet.json ./owner_wallet.backup.json
+```
+
+To pin a wallet you already control instead, set `AITOKEN_OWNER_ADDRESS` in
+`docker-compose.yml`.
+
+**Render (managed hosting with a public URL):** the repo includes a `render.yaml`
+blueprint — in the Render dashboard choose *New → Blueprint*, point it at this
+repo and branch, and it provisions the service with a persistent disk.
+
+**Bare VPS without Docker:** see `deploy/aitoken.service` for a hardened systemd
+unit and setup commands.
+
+> **Before exposing this publicly:** the convenience endpoints
+> (`/api/wallet/sign-and-send`, and the `private_key` field on order/withdraw/spend
+> requests) accept private keys in request bodies — designed for a localhost demo.
+> On a public deployment, put it behind TLS (e.g. Caddy/nginx), treat all
+> on-platform value as play money, and remember that operating a real-money
+> exchange is a regulated activity.
+
 ## Tests
 
 ```bash
