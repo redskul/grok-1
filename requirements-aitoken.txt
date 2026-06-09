@@ -1,0 +1,7 @@
+# AI Token platform dependencies (separate from the Grok-1 ML requirements;
+# you do NOT need JAX to run the token platform).
+fastapi>=0.110
+uvicorn>=0.29
+ecdsa>=0.18
+httpx>=0.27
+pytest>=8.0

@@ -1,2 +1,9 @@
 checkpoints/*
 !checkpoints/README.md
+
+# AI Token platform runtime artifacts
+aitoken.db*
+owner_wallet.json
+*.wallet.json
+__pycache__/
+.pytest_cache/
